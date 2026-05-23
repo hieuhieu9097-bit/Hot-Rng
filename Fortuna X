@@ -1,28 +1,27 @@
--- [[ FORTUNA X - CLEAN VERSION FOR DELTA MOBILE ]]
--- UI Framework: LinoriaLib (Stripped Addons for Stability)
+-- [[ FORTUNA X - HOT RNG SCRIPT ]]
+-- UI Framework: Orion Library (Thân thiện nhất với Delta Mobile)
+-- Optimized for Mobile Executors
 
--- 1. KHỞI TẠO THƯ VIỆN GỐC (Bỏ hoàn toàn addon gây crash trên Delta)
-local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
-local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+-- 0. Dọn dẹp GUI cũ nếu có để tránh kẹt menu
+if game:GetService("CoreGui"):FindFirstChild("Orion") then
+    game:GetService("CoreGui").Orion:Destroy()
+end
 
-Library.ForceCheckbox = false 
-Library.ShowToggleFrameInKeybinds = true 
+-- 1. KHỞI TẠO ORION LIBRARY
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source.lua')))()
 
--- Tạo Cửa sổ giao diện chính
-local Window = Library:CreateWindow({
-	Title = "Fortuna X | Hot RNG",
-	Footer = "Delta Mobile Stable v1",
-	NotifySide = "Right",
-	ShowCustomCursor = false, -- Tắt cursor để không lỗi cảm ứng mobile
+-- Tạo Cửa sổ chính (Tự động tạo nút ẩn/hiện hình tròn trên màn hình điện thoại)
+local Window = OrionLib:MakeWindow({
+    Name = "Fortuna X | Hot RNG", 
+    HidePremium = true, 
+    SaveConfig = false, 
+    IntroText = "Loading Fortuna X...",
+    IntroToggle = true
 })
 
--- Chỉ tạo 1 Tab duy nhất để giảm tải bộ nhớ cho Delta
-local Tabs = {
-	Main = Window:AddTab("Main", "user"),
-}
-
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Main Features", "boxes")
-local RightGroupBox = Tabs.Main:AddRightGroupbox("Status Info")
+-- Các biến trạng thái hoạt động (Toggles)
+local AutoCollectClovers = false
+local AutoPray = false
 
 -- Lấy thông tin người chơi
 local Player = game.Players.LocalPlayer
@@ -36,317 +35,108 @@ local function getRoot()
 end
 
 -- ==========================================
--- CÀI ĐẶT CÁC TÍNH NĂNG CHÍNH (MAIN FEATURES)
+-- CẤU HÌNH CÁC TÁB & CHỨC NĂNG (ORION SYNTAX)
 -- ==========================================
+
+local MainTab = Window:MakeTab({
+	Name = "Main Features",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 
 -- CHỨC NĂNG 1: AUTO COLLECT CLOVERS
-LeftGroupBox:AddToggle("CloverToggle", {
-	Text = "Auto Collect Clovers",
+MainTab:AddToggle({
+	Name = "Auto Collect Clovers",
 	Default = false,
-	Tooltip = "Tự động dịch chuyển nhặt toàn bộ vật phẩm trong folder Clovers",
-})
-
-Library.Toggles.CloverToggle:OnChanged(function()
-    if Library.Toggles.CloverToggle.Value then
-        task.spawn(function()
-            while Library.Toggles.CloverToggle.Value do
-                task.wait(0.1)
-                
-                local cloversFolder = workspace:FindFirstChild("Clovers")
-                if cloversFolder then
-                    local clovers = cloversFolder:GetChildren()
-                    
-                    for _, clover in ipairs(clovers) do
-                        if not Library.Toggles.CloverToggle.Value then break end
-                        
-                        local targetCFrame = nil
-                        if clover:IsA("BasePart") then
-                            targetCFrame = clover.CFrame
-                        elseif clover:IsA("Model") and clover.PrimaryPart then
-                            targetCFrame = clover.PrimaryPart.CFrame
-                        elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
-                            targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
-                        end
-                        
-                        if targetCFrame then
-                            pcall(function()
-                                getRoot().CFrame = targetCFrame
-                            end)
-                            task.wait(0.2)
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- CHỨC NĂNG 2: AUTO PRAY
-LeftGroupBox:AddToggle("PrayToggle", {
-	Text = "Auto Pray",
-	Default = false,
-	Tooltip = "Teleport tới Praypart, tự bấm nút tương tác và tự động chờ 330 giây",
-})
-
-Library.Toggles.PrayToggle:OnChanged(function()
-    if Library.Toggles.PrayToggle.Value then
-        task.spawn(function()
-            while Library.Toggles.PrayToggle.Value do
-                local prayPart = workspace:FindFirstChild("Praypart", true)
-                
-                if prayPart and prayPart:IsA("BasePart") then
-                    pcall(function()
-                        getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0)
-                    end)
-                    task.wait(0.5)
-                    
-                    local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
-                    if prompt then
-                        pcall(function()
-                            fireproximityprompt(prompt)
-                        end)
-                    end
-                    
-                    for i = 1, 330 do
-                        if not Library.Toggles.PrayToggle.Value then break end
-                        task.wait(1)
-                    end
-                else
-                    task.wait(5)
-                end
-            end
-        end)
-    end
-end)
-
--- BẢNG THÔNG TIN PHỤ Ở CỘT PHẢI
-RightGroupBox:AddLabel("Script Status: Active")
-RightGroupBox:AddLabel("Executor: Delta Mobile Optimized")
-RightGroupBox:AddDivider()
-
--- Nút Unload Script phòng trường hợp bạn muốn tắt hẳn menu
-RightGroupBox:AddButton("Unload Script", function()
-	Library:Unload()
-end)
-
--- ==========================================
--- TẠO NÚT BẤM ĐỂ TẮT/MỞ MENU TRÊN ĐIỆN THOẠI
--- ==========================================
--- Vì trên Mobile không có phím "RightShift", đoạn này tạo 1 nút bấm nhỏ trên màn hình để ẩn/hiện GUI Linoria
-local OpenCloseGui = Instance.new("ScreenGui")
-local ToggleButton = Instance.new("TextButton")
-
-OpenCloseGui.Name = "FortunaX_DeltaButton"
-OpenCloseGui.Parent = game.CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-ToggleButton.Parent = OpenCloseGui
-ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-ToggleButton.Position = UDim2.new(0, 10, 0, 150) -- Vị trí nút ở cạnh trái màn hình
-ToggleButton.Size = UDim2.new(0, 80, 0, 30)
-ToggleButton.Text = "Fortuna X"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.TextSize = 12
-
--- Khi bấm vào nút này sẽ ẩn hoặc hiện Menu chính
-ToggleButton.MouseButton1Click:Connect(function()
-    Library.IsCurrentlyOpen = not Library.IsCurrentlyOpen
-    Library:Toggle()
-end)
-
--- Gửi thông báo nạp thành công
-Library:Notify({
-    Title = "Fortuna X",
-    Description = "Loaded bypass for Delta Mobile successfully!",
-    Time = 5,
-})
-                        local targetCFrame = nil
-                        if clover:IsA("BasePart") then
-                            targetCFrame = clover.CFrame
-                        elseif clover:IsA("Model") and clover.PrimaryPart then
-                            targetCFrame = clover.PrimaryPart.CFrame
-                        elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
-                            targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
-                        end
-                        
-                        -- Thực hiện dịch chuyển tức thời (Instant Teleport)
-                        if targetCFrame then
-                            pcall(function()
-                                getRoot().CFrame = targetCFrame
-                            end)
-                            task.wait(0.2) -- Khựng lại một chút để game đồng bộ dữ liệu nhận Clover
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- CHỨC NĂNG 2: AUTO PRAY
-LeftGroupBox:AddToggle("PrayToggle", {
-	Text = "Auto Pray",
-	Default = false,
-	Tooltip = "Teleport tới Praypart, tự bấm nút tương tác và tự động chờ 330 giây",
-})
-
--- Xử lý Logic cho Auto Pray bằng :OnChanged
-Library.Toggles.PrayToggle:OnChanged(function()
-    local state = Library.Toggles.PrayToggle.Value
-    if state then
-        task.spawn(function()
-            while Library.Toggles.PrayToggle.Value do
-                -- Tìm kiếm sâu vật thể có tên Praypart trong Workspace
-                local prayPart = workspace:FindFirstChild("Praypart", true)
-                
-                if prayPart and prayPart:IsA("BasePart") then
-                    -- 1. Teleport lập tức tới vị trí Praypart
-                    pcall(function()
-                        getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) -- Cao hơn 3 block tránh kẹt đất
-                    end)
-                    task.wait(0.5) -- Đợi nhân vật ổn định vị trí sau khi dịch chuyển
-                    
-                    -- 2. Tìm và kích hoạt ProximityPrompt để tương tác cầu nguyện
-                    local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
-                    if prompt then
-                        pcall(function()
-                            fireproximityprompt(prompt)
-                        end)
-                    end
-                    
-                    -- 3. Vòng lặp đếm ngược 330 giây (Có thể ngắt ngay lập tức khi tắt Toggle)
-                    for i = 1, 330 do
-                        if not Library.Toggles.PrayToggle.Value then break end
-                        task.wait(1)
-                    end
-                else
-                    -- Nếu không tìm thấy Praypart trên bản đồ, đợi 5 giây rồi quét lại
-                    task.wait(5)
-                end
-            end
-        end)
-    end
-end)
-
--- BẢNG THÔNG TIN PHỤ Ở CỘT PHẢI
-RightGroupBox:AddLabel("Script Status: Active")
-RightGroupBox:AddLabel("Framework: Linoria Modded")
-RightGroupBox:AddDivider()
-RightGroupBox:AddLabel("Chúc bạn chơi game vui vẻ!")
-
--- ==========================================
--- CÀI ĐẶT HỆ THỐNG CỦA THƯ VIỆN (UI SETTINGS)
--- ==========================================
-local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu Settings", "wrench")
-
-MenuGroup:AddToggle("KeybindMenuOpen", {
-	Default = Library.KeybindFrame.Visible,
-	Text = "Open Keybind Menu",
-	Callback = function(value)
-		Library.KeybindFrame.Visible = value
-	end,
-})
-
-MenuGroup:AddDropdown("NotificationSide", {
-	Values = { "Left", "Right" },
-	Default = "Right",
-	Text = "Notification Side",
 	Callback = function(Value)
-		Library:SetNotifySide(Value)
-	end,
-})
-
-MenuGroup:AddDropdown("DPIDropdown", {
-	Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
-	Default = "100%",
-	Text = "DPI Scale (Mobile Optimize)",
-	Callback = function(Value)
-		Value = Value:gsub("%%", "")
-		local DPI = tonumber(Value)
-		Library:SetDPIScale(DPI)
-	end,
-})
-
-MenuGroup:AddDivider()
-MenuGroup:AddLabel("Menu Bind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
-Library.ToggleKeybind = Options.MenuKeybind 
-
-MenuGroup:AddButton("Unload Script", function()
-	Library:Unload()
-end)
-
--- Tự động thiết lập cấu hình lưu trữ
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
-
-ThemeManager:SetFolder("FortunaX")
-SaveManager:SetFolder("FortunaX/HotRNG")
-
-SaveManager:BuildConfigSection(Tabs["UI Settings"])
-ThemeManager:ApplyToTab(Tabs["UI Settings"])
-SaveManager:LoadAutoloadConfig()
-
--- Gửi thông báo khởi chạy thành công
-Library:Notify({
-    Title = "Fortuna X",
-    Description = "Script loaded successfully with Linoria UI!",
-    Time = 5,
-})
-                                break
+		AutoCollectClovers = Value
+        if AutoCollectClovers then
+            task.spawn(function()
+                while AutoCollectClovers do
+                    task.wait(0.1) -- Giữ delay nhỏ để máy không bị quá nhiệt
+                    
+                    local cloversFolder = workspace:FindFirstChild("Clovers")
+                    if cloversFolder then
+                        local clovers = cloversFolder:GetChildren()
+                        
+                        for _, clover in ipairs(clovers) do
+                            if not AutoCollectClovers then break end
+                            
+                            local targetCFrame = nil
+                            if clover:IsA("BasePart") then
+                                targetCFrame = clover.CFrame
+                            elseif clover:IsA("Model") and clover.PrimaryPart then
+                                targetCFrame = clover.PrimaryPart.CFrame
+                            elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
+                                targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
+                            end
+                            
+                            -- Dịch chuyển tức thời
+                            if targetCFrame then
+                                pcall(function()
+                                    getRoot().CFrame = targetCFrame
+                                end)
+                                task.wait(0.2) -- Đợi game đồng bộ dữ liệu nhận Clover
                             end
                         end
                     end
                 end
             end)
         end
-    end
+	end
 })
 
 -- CHỨC NĂNG 2: AUTO PRAY
-MainTab:CreateToggle({
-    Title = "Auto Pray",
-    Default = false,
-    Callback = function(Value)
-        AutoPray = Value
+MainTab:AddToggle({
+	Name = "Auto Pray",
+	Default = false,
+	Callback = function(Value)
+		AutoPray = Value
         if AutoPray then
             task.spawn(function()
                 while AutoPray do
-                    -- Tìm kiếm sâu (quét đệ quy) trong Workspace để tìm Praypart
+                    -- Tìm kiếm đệ quy Praypart trong Workspace
                     local prayPart = workspace:FindFirstChild("Praypart", true)
                     
                     if prayPart and prayPart:IsA("BasePart") then
                         -- 1. Teleport lập tức tới Praypart
                         pcall(function()
-                            getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) -- Cao hơn 3 block tránh kẹt đất
+                            getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) -- Cao hơn 3 block tránh kẹt sàn
                         end)
                         task.wait(0.5) -- Đợi nhân vật ổn định vị trí
                         
-                        -- 2. Tìm và kích hoạt ProximityPrompt
+                        -- 2. Tìm và kích hoạt ProximityPrompt để tương tác
                         local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
                         if prompt then
                             pcall(function()
-                                fireproximityprompt(prompt) -- Kích hoạt nút tương tác
+                                fireproximityprompt(prompt)
                             end)
                         end
                         
-                        -- 3. Đếm ngược 330 giây (có thể ngắt ngay khi tắt toggle)
+                        -- 3. Vòng lặp đếm ngược 330 giây (có thể ngắt ngay khi tắt toggle)
                         for i = 1, 330 do
                             if not AutoPray then break end
                             task.wait(1)
                         end
                     else
-                        -- Nếu không thấy Part, đợi 5 giây rồi tìm lại để tránh sập script
+                        -- Nếu không thấy Part, đợi 5 giây rồi tìm lại
                         task.wait(5)
                     end
                 end
             end)
         end
-    end
+	end
 })
 
--- Thêm một nhãn thông tin nhỏ phía dưới giao diện
-MainTab:CreateLabel({
-    Title = "Status: Fortuna X Active!",
-    Style = "Success" -- Hiển thị màu xanh lá báo hiệu hoạt động tốt
+-- BẢNG THÔNG TIN PHỤ TRONG MENU
+local InfoTab = Window:MakeTab({
+	Name = "Credits/Status",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
 })
+
+InfoTab:AddLabel("Status: Fortuna X Active")
+InfoTab:AddLabel("UI Framework: Orion UI (Delta Mobile Friendly)")
+
+-- KÍCH HOẠT HỆ THỐNG
+OrionLib:Init()
