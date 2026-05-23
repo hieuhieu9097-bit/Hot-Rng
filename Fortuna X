@@ -1,84 +1,112 @@
--- [[ FORTUNA X - CUSTOM CORRECTIONS FOR DELTA MOBILE ]]
--- UI Framework: Native Instance (Không sử dụng thư viện ngoài, chống lỗi chặn HttpGet)
-
--- 0. Dọn sạch bản cũ tránh đè GUI
-if game:GetService("CoreGui"):FindFirstChild("FortunaX_Native") then
-    game:GetService("CoreGui")["FortunaX_Native"]:Destroy()
+if game:GetService("CoreGui"):FindFirstChild("FortunaX_ToraStyle") then
+    game:GetService("CoreGui")["FortunaX_ToraStyle"]:Destroy()
 end
 
--- 1. KHỞI TẠO INTERFACE THUẦN
 local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local FrameCorner = Instance.new("UICorner")
-local Title = Instance.new("TextLabel")
-local ToggleCloverBtn = Instance.new("TextButton")
-local ButtonCorner1 = Instance.new("UICorner")
-local TogglePrayBtn = Instance.new("TextButton")
-local ButtonCorner2 = Instance.new("UICorner")
-local CreditLabel = Instance.new("TextLabel")
-
--- Cấu hình hiển thị lớp trên cùng của màn hình di động
-ScreenGui.Name = "FortunaX_Native"
+ScreenGui.Name = "FortunaX_ToraStyle"
 ScreenGui.Parent = game:GetService("CoreGui") or game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Thân Menu chính (Nhỏ gọn, đặt ở góc màn hình tránh vướng)
+local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 180, 0, 190)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 240, 0, 220)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Giữ và kéo menu bằng tay trên điện thoại thoải mái
+MainFrame.Draggable = true
 
-FrameCorner.CornerRadius = UDim.new(0, 8)
+local FrameCorner = Instance.new("UICorner")
+FrameCorner.CornerRadius = UDim.new(0, 10)
 FrameCorner.Parent = MainFrame
 
--- Tiêu đề Menu
-Title.Name = "Title"
-Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Font = Enum.Font.SourceSansBold
-Title.Text = "Fortuna X (Delta)"
+local FrameStroke = Instance.new("UIStroke")
+FrameStroke.Color = Color3.fromRGB(0, 170, 255)
+FrameStroke.Thickness = 1.5
+FrameStroke.Parent = MainFrame
+
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+
+local TopBarCorner = Instance.new("UICorner")
+TopBarCorner.CornerRadius = UDim.new(0, 10)
+TopBarCorner.Parent = TopBar
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "FORTUNA X"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Center
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 8)
-TitleCorner.Parent = Title
+local StatusLog = Instance.new("TextLabel")
+StatusLog.Name = "StatusLog"
+StatusLog.Parent = MainFrame
+StatusLog.BackgroundTransparency = 1
+StatusLog.Position = UDim2.new(0.05, 0, 0.73, 0)
+StatusLog.Size = UDim2.new(0.9, 0, 0, 20)
+StatusLog.Font = Enum.Font.Gotham
+StatusLog.Text = "Status: Idle"
+StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+StatusLog.TextSize = 11
+StatusLog.TextXAlignment = Enum.TextXAlignment.Left
 
--- Biến trạng thái hoạt động (Toggles)
 local AutoCollectClovers = false
 local AutoPray = false
 
--- Lấy thông tin người chơi
 local Player = game.Players.LocalPlayer
 local function getRoot()
     return Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
 end
 
--- NÚT 1: AUTO COLLECT CLOVERS
-ToggleCloverBtn.Name = "ToggleCloverBtn"
-ToggleCloverBtn.Parent = MainFrame
-ToggleCloverBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50) -- Màu đỏ (OFF)
-ToggleCloverBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
-ToggleCloverBtn.Size = UDim2.new(0.9, 0, 0, 35)
-ToggleCloverBtn.Font = Enum.Font.SourceSansBold
-ToggleCloverBtn.Text = "Clovers: OFF"
-ToggleCloverBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleCloverBtn.TextSize = 13
+local function createToraToggle(name, text, pos, callback)
+    local Button = Instance.new("TextButton")
+    Button.Name = name
+    Button.Parent = MainFrame
+    Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    Button.Position = pos
+    Button.Size = UDim2.new(0.9, 0, 0, 38)
+    Button.Font = Enum.Font.GothamBold
+    Button.Text = text .. " : [OFF]"
+    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Button.TextSize = 12
+    
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = Button
+    
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+    BtnStroke.Thickness = 1
+    BtnStroke.Parent = Button
 
-ButtonCorner1.CornerRadius = UDim.new(0, 5)
-ButtonCorner1.Parent = ToggleCloverBtn
+    local active = false
+    Button.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            Button.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
+            Button.TextColor3 = Color3.fromRGB(0, 200, 255)
+            BtnStroke.Color = Color3.fromRGB(0, 170, 255)
+            Button.Text = text .. " : [ON]"
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+            Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+            BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+            Button.Text = text .. " : [OFF]"
+        end
+        callback(active)
+    end)
+end
 
-ToggleCloverBtn.MouseButton1Click:Connect(function()
-    AutoCollectClovers = not AutoCollectClovers
+createToraToggle("CloverBtn", "Auto Collect Clovers", UDim2.new(0.05, 0, 0.23, 0), function(state)
+    AutoCollectClovers = state
     if AutoCollectClovers then
-        ToggleCloverBtn.BackgroundColor3 = Color3.fromRGB(50, 160, 50) -- Xanh (ON)
-        ToggleCloverBtn.Text = "Clovers: ON"
-        
-        -- Vòng lặp tính năng
         task.spawn(function()
             while AutoCollectClovers do
                 task.wait(0.1)
@@ -95,137 +123,99 @@ ToggleCloverBtn.MouseButton1Click:Connect(function()
                 end
             end
         end)
-    else
-        ToggleCloverBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-        ToggleCloverBtn.Text = "Clovers: OFF"
     end
 end)
 
--- NÚT 2: AUTO PRAY
-TogglePrayBtn.Name = "TogglePrayBtn"
-TogglePrayBtn.Parent = MainFrame
-TogglePrayBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-TogglePrayBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
-TogglePrayBtn.Size = UDim2.new(0.9, 0, 0, 35)
-TogglePrayBtn.Font = Enum.Font.SourceSansBold
-TogglePrayBtn.Text = "Auto Pray: OFF"
-TogglePrayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TogglePrayBtn.TextSize = 13
-
-ButtonCorner2.CornerRadius = UDim.new(0, 5)
-ButtonCorner2.Parent = TogglePrayBtn
-
-TogglePrayBtn.MouseButton1Click:Connect(function()
-    AutoPray = not AutoPray
+createToraToggle("PrayBtn", "Auto Pray", UDim2.new(0.05, 0, 0.48, 0), function(state)
+    AutoPray = state
     if AutoPray then
-        TogglePrayBtn.BackgroundColor3 = Color3.fromRGB(50, 160, 50)
-        TogglePrayBtn.Text = "Auto Pray: ON"
-        
-        -- Vòng lặp tính năng
         task.spawn(function()
             while AutoPray do
-                local part = workspace:FindFirstChild("Praypart", true)
-                if part and part:IsA("BasePart") and getRoot() then
-                    pcall(function() getRoot().CFrame = part.CFrame + Vector3.new(0, 3, 0) end)
+                StatusLog.Text = "Status: Scanning PrayPart..."
+                StatusLog.TextColor3 = Color3.fromRGB(255, 180, 0)
+                
+                local prayPart = workspace:FindFirstChild("PrayPart", true)
+                
+                if prayPart and prayPart:IsA("BasePart") and getRoot() then
+                    StatusLog.Text = "Status: Found! Teleporting..."
+                    StatusLog.TextColor3 = Color3.fromRGB(0, 200, 255)
+                    
+                    pcall(function() 
+                        getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) 
+                    end)
                     task.wait(0.5)
                     
-                    local prompt = part:FindFirstChildWhichIsA("ProximityPrompt") or part:FindFirstChild("ProximityPrompt", true)
+                    StatusLog.Text = "Status: Praying..."
+                    
+                    local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
+                    
                     if prompt then
                         pcall(function() fireproximityprompt(prompt) end)
-                    end
-                    
-                    for i = 1, 330 do
-                        if not AutoPray then break end
-                        task.wait(1)
-                    end
-                else
-                    task.wait(5)
-                end
-            end
-        end)
-    else
-        TogglePrayBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-        TogglePrayBtn.Text = "Auto Pray: OFF"
-    end
-end)
-
--- Nhãn thông báo nhỏ bên dưới
-CreditLabel.Parent = MainFrame
-CreditLabel.Position = UDim2.new(0, 0, 0.8, 0)
-CreditLabel.Size = UDim2.new(1, 0, 0, 20)
-CreditLabel.Font = Enum.Font.SourceSans
-CreditLabel.Text = "Hold title to move GUI"
-CreditLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-CreditLabel.TextSize = 11
-                                targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
-                            end
-                            
-                            -- Dịch chuyển tức thời
-                            if targetCFrame then
-                                pcall(function()
-                                    getRoot().CFrame = targetCFrame
-                                end)
-                                task.wait(0.2) -- Đợi game đồng bộ dữ liệu nhận Clover
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-	end
-})
-
--- CHỨC NĂNG 2: AUTO PRAY
-MainTab:AddToggle({
-	Name = "Auto Pray",
-	Default = false,
-	Callback = function(Value)
-		AutoPray = Value
-        if AutoPray then
-            task.spawn(function()
-                while AutoPray do
-                    -- Tìm kiếm đệ quy Praypart trong Workspace
-                    local prayPart = workspace:FindFirstChild("Praypart", true)
-                    
-                    if prayPart and prayPart:IsA("BasePart") then
-                        -- 1. Teleport lập tức tới Praypart
-                        pcall(function()
-                            getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) -- Cao hơn 3 block tránh kẹt sàn
-                        end)
-                        task.wait(0.5) -- Đợi nhân vật ổn định vị trí
+                        StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
                         
-                        -- 2. Tìm và kích hoạt ProximityPrompt để tương tác
-                        local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
-                        if prompt then
-                            pcall(function()
-                                fireproximityprompt(prompt)
-                            end)
-                        end
-                        
-                        -- 3. Vòng lặp đếm ngược 330 giây (có thể ngắt ngay khi tắt toggle)
-                        for i = 1, 330 do
+                        for i = 330, 1, -1 do
                             if not AutoPray then break end
+                            local minutes = math.floor(i / 60)
+                            local seconds = i % 60
+                            StatusLog.Text = "Status: " .. minutes .. "m" .. seconds .. "s"
                             task.wait(1)
                         end
                     else
-                        -- Nếu không thấy Part, đợi 5 giây rồi tìm lại
-                        task.wait(5)
+                        StatusLog.Text = "Status: Error - No Prompt"
+                        StatusLog.TextColor3 = Color3.fromRGB(255, 50, 50)
+                        task.wait(4)
                     end
+                else
+                    StatusLog.Text = "Status: Error - Part Not Found"
+                    StatusLog.TextColor3 = Color3.fromRGB(255, 50, 50)
+                    task.wait(5)
                 end
-            end)
-        end
-	end
-})
+            end
+            StatusLog.Text = "Status: Disabled"
+            StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+        end)
+    end
+end)
 
--- BẢNG THÔNG TIN PHỤ TRONG MENU
-local InfoTab = Window:MakeTab({
-	Name = "Credits/Status",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
+local Watermark = Instance.new("TextLabel")
+Watermark.Parent = MainFrame
+Watermark.BackgroundTransparency = 1
+Watermark.Position = UDim2.new(0, 0, 0.88, 0)
+Watermark.Size = UDim2.new(1, 0, 0, 20)
+Watermark.Font = Enum.Font.SourceSansItalic
+Watermark.Text = "made by Second"
+Watermark.TextColor3 = Color3.fromRGB(120, 120, 130)
+Watermark.TextSize = 11
 
-InfoTab:AddLabel("Status: Fortuna X Active")
-InfoTab:AddLabel("UI Framework: Orion UI (Delta Mobile Friendly)")
+local FloatingBtn = Instance.new("TextButton")
+FloatingBtn.Name = "FloatingBtn"
+FloatingBtn.Parent = ScreenGui
+FloatingBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+FloatingBtn.Position = UDim2.new(0, 15, 0, 120)
+FloatingBtn.Size = UDim2.new(0, 45, 0, 45)
+FloatingBtn.Font = Enum.Font.GothamBold
+FloatingBtn.Text = "FX"
+FloatingBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
+FloatingBtn.TextSize = 14
 
--- KÍCH HOẠT HỆ THỐNG
-OrionLib:Init()
+local RoundCorner = Instance.new("UICorner")
+RoundCorner.CornerRadius = UDim.new(1, 0)
+RoundCorner.Parent = FloatingBtn
+
+local RoundStroke = Instance.new("UIStroke")
+RoundStroke.Color = Color3.fromRGB(0, 170, 255)
+RoundStroke.Thickness = 2
+RoundStroke.Parent = FloatingBtn
+
+local UiVisible = true
+FloatingBtn.MouseButton1Click:Connect(function()
+    UiVisible = not UiVisible
+    MainFrame.Visible = UiVisible
+    if UiVisible then
+        FloatingBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
+        RoundStroke.Color = Color3.fromRGB(0, 170, 255)
+    else
+        FloatingBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        RoundStroke.Color = Color3.fromRGB(60, 60, 70)
+    end
+end)
