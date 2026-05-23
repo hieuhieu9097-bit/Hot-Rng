@@ -1,33 +1,26 @@
--- [[ FORTUNA X - HOT RNG SCRIPT ]]
--- UI Framework: LinoriaLib (Modified by deivid)
--- Optimized for Mobile Executors
+-- [[ FORTUNA X - CLEAN VERSION FOR DELTA MOBILE ]]
+-- UI Framework: LinoriaLib (Stripped Addons for Stability)
 
--- 1. KHỞI TẠO THƯ VIỆN LINORIALIB & ADDONS
+-- 1. KHỞI TẠO THƯ VIỆN GỐC (Bỏ hoàn toàn addon gây crash trên Delta)
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
--- Thiết lập cấu hình tối ưu cho người dùng Mobile
 Library.ForceCheckbox = false 
 Library.ShowToggleFrameInKeybinds = true 
 
--- Tạo Cửa sổ giao diện chính (Window)
+-- Tạo Cửa sổ giao diện chính
 local Window = Library:CreateWindow({
 	Title = "Fortuna X | Hot RNG",
-	Footer = "Version: 1.0.0",
-	Icon = 95816097006870,
+	Footer = "Delta Mobile Stable v1",
 	NotifySide = "Right",
-	ShowCustomCursor = false, -- Tắt cursor tùy chỉnh để đỡ loạn cảm ứng trên Mobile
+	ShowCustomCursor = false, -- Tắt cursor để không lỗi cảm ứng mobile
 })
 
--- Khởi tạo các Tab
+-- Chỉ tạo 1 Tab duy nhất để giảm tải bộ nhớ cho Delta
 local Tabs = {
 	Main = Window:AddTab("Main", "user"),
-	["UI Settings"] = Window:AddTab("UI Settings", "settings"),
 }
 
--- Tạo các Groupbox chia cột theo chuẩn Linoria
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Main Features", "boxes")
 local RightGroupBox = Tabs.Main:AddRightGroupbox("Status Info")
 
@@ -53,10 +46,8 @@ LeftGroupBox:AddToggle("CloverToggle", {
 	Tooltip = "Tự động dịch chuyển nhặt toàn bộ vật phẩm trong folder Clovers",
 })
 
--- Xử lý Logic cho Auto Collect Clovers bằng :OnChanged đúng khuyến nghị của thư viện
 Library.Toggles.CloverToggle:OnChanged(function()
-    local state = Library.Toggles.CloverToggle.Value
-    if state then
+    if Library.Toggles.CloverToggle.Value then
         task.spawn(function()
             while Library.Toggles.CloverToggle.Value do
                 task.wait(0.1)
@@ -68,6 +59,106 @@ Library.Toggles.CloverToggle:OnChanged(function()
                     for _, clover in ipairs(clovers) do
                         if not Library.Toggles.CloverToggle.Value then break end
                         
+                        local targetCFrame = nil
+                        if clover:IsA("BasePart") then
+                            targetCFrame = clover.CFrame
+                        elseif clover:IsA("Model") and clover.PrimaryPart then
+                            targetCFrame = clover.PrimaryPart.CFrame
+                        elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
+                            targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
+                        end
+                        
+                        if targetCFrame then
+                            pcall(function()
+                                getRoot().CFrame = targetCFrame
+                            end)
+                            task.wait(0.2)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- CHỨC NĂNG 2: AUTO PRAY
+LeftGroupBox:AddToggle("PrayToggle", {
+	Text = "Auto Pray",
+	Default = false,
+	Tooltip = "Teleport tới Praypart, tự bấm nút tương tác và tự động chờ 330 giây",
+})
+
+Library.Toggles.PrayToggle:OnChanged(function()
+    if Library.Toggles.PrayToggle.Value then
+        task.spawn(function()
+            while Library.Toggles.PrayToggle.Value do
+                local prayPart = workspace:FindFirstChild("Praypart", true)
+                
+                if prayPart and prayPart:IsA("BasePart") then
+                    pcall(function()
+                        getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0)
+                    end)
+                    task.wait(0.5)
+                    
+                    local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
+                    if prompt then
+                        pcall(function()
+                            fireproximityprompt(prompt)
+                        end)
+                    end
+                    
+                    for i = 1, 330 do
+                        if not Library.Toggles.PrayToggle.Value then break end
+                        task.wait(1)
+                    end
+                else
+                    task.wait(5)
+                end
+            end
+        end)
+    end
+end)
+
+-- BẢNG THÔNG TIN PHỤ Ở CỘT PHẢI
+RightGroupBox:AddLabel("Script Status: Active")
+RightGroupBox:AddLabel("Executor: Delta Mobile Optimized")
+RightGroupBox:AddDivider()
+
+-- Nút Unload Script phòng trường hợp bạn muốn tắt hẳn menu
+RightGroupBox:AddButton("Unload Script", function()
+	Library:Unload()
+end)
+
+-- ==========================================
+-- TẠO NÚT BẤM ĐỂ TẮT/MỞ MENU TRÊN ĐIỆN THOẠI
+-- ==========================================
+-- Vì trên Mobile không có phím "RightShift", đoạn này tạo 1 nút bấm nhỏ trên màn hình để ẩn/hiện GUI Linoria
+local OpenCloseGui = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("TextButton")
+
+OpenCloseGui.Name = "FortunaX_DeltaButton"
+OpenCloseGui.Parent = game.CoreGui or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+ToggleButton.Parent = OpenCloseGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleButton.Position = UDim2.new(0, 10, 0, 150) -- Vị trí nút ở cạnh trái màn hình
+ToggleButton.Size = UDim2.new(0, 80, 0, 30)
+ToggleButton.Text = "Fortuna X"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 12
+
+-- Khi bấm vào nút này sẽ ẩn hoặc hiện Menu chính
+ToggleButton.MouseButton1Click:Connect(function()
+    Library.IsCurrentlyOpen = not Library.IsCurrentlyOpen
+    Library:Toggle()
+end)
+
+-- Gửi thông báo nạp thành công
+Library:Notify({
+    Title = "Fortuna X",
+    Description = "Loaded bypass for Delta Mobile successfully!",
+    Time = 5,
+})
                         local targetCFrame = nil
                         if clover:IsA("BasePart") then
                             targetCFrame = clover.CFrame
