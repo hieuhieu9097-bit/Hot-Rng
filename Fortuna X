@@ -1,73 +1,162 @@
--- [[ FORTUNA X - HOT RNG SCRIPT ]]
--- UI Framework: Orion Library (Thân thiện nhất với Delta Mobile)
--- Optimized for Mobile Executors
+-- [[ FORTUNA X - CUSTOM CORRECTIONS FOR DELTA MOBILE ]]
+-- UI Framework: Native Instance (Không sử dụng thư viện ngoài, chống lỗi chặn HttpGet)
 
--- 0. Dọn dẹp GUI cũ nếu có để tránh kẹt menu
-if game:GetService("CoreGui"):FindFirstChild("Orion") then
-    game:GetService("CoreGui").Orion:Destroy()
+-- 0. Dọn sạch bản cũ tránh đè GUI
+if game:GetService("CoreGui"):FindFirstChild("FortunaX_Native") then
+    game:GetService("CoreGui")["FortunaX_Native"]:Destroy()
 end
 
--- 1. KHỞI TẠO ORION LIBRARY
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source.lua')))()
+-- 1. KHỞI TẠO INTERFACE THUẦN
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local FrameCorner = Instance.new("UICorner")
+local Title = Instance.new("TextLabel")
+local ToggleCloverBtn = Instance.new("TextButton")
+local ButtonCorner1 = Instance.new("UICorner")
+local TogglePrayBtn = Instance.new("TextButton")
+local ButtonCorner2 = Instance.new("UICorner")
+local CreditLabel = Instance.new("TextLabel")
 
--- Tạo Cửa sổ chính (Tự động tạo nút ẩn/hiện hình tròn trên màn hình điện thoại)
-local Window = OrionLib:MakeWindow({
-    Name = "Fortuna X | Hot RNG", 
-    HidePremium = true, 
-    SaveConfig = false, 
-    IntroText = "Loading Fortuna X...",
-    IntroToggle = true
-})
+-- Cấu hình hiển thị lớp trên cùng của màn hình di động
+ScreenGui.Name = "FortunaX_Native"
+ScreenGui.Parent = game:GetService("CoreGui") or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
 
--- Các biến trạng thái hoạt động (Toggles)
+-- Thân Menu chính (Nhỏ gọn, đặt ở góc màn hình tránh vướng)
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 180, 0, 190)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Giữ và kéo menu bằng tay trên điện thoại thoải mái
+
+FrameCorner.CornerRadius = UDim.new(0, 8)
+FrameCorner.Parent = MainFrame
+
+-- Tiêu đề Menu
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "Fortuna X (Delta)"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = Title
+
+-- Biến trạng thái hoạt động (Toggles)
 local AutoCollectClovers = false
 local AutoPray = false
 
 -- Lấy thông tin người chơi
 local Player = game.Players.LocalPlayer
-local function getCharacter()
-    return Player.Character or Player.CharacterAdded:Wait()
-end
-
 local function getRoot()
-    local char = getCharacter()
-    return char:WaitForChild("HumanoidRootPart")
+    return Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
 end
 
--- ==========================================
--- CẤU HÌNH CÁC TÁB & CHỨC NĂNG (ORION SYNTAX)
--- ==========================================
+-- NÚT 1: AUTO COLLECT CLOVERS
+ToggleCloverBtn.Name = "ToggleCloverBtn"
+ToggleCloverBtn.Parent = MainFrame
+ToggleCloverBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50) -- Màu đỏ (OFF)
+ToggleCloverBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
+ToggleCloverBtn.Size = UDim2.new(0.9, 0, 0, 35)
+ToggleCloverBtn.Font = Enum.Font.SourceSansBold
+ToggleCloverBtn.Text = "Clovers: OFF"
+ToggleCloverBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleCloverBtn.TextSize = 13
 
-local MainTab = Window:MakeTab({
-	Name = "Main Features",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
+ButtonCorner1.CornerRadius = UDim.new(0, 5)
+ButtonCorner1.Parent = ToggleCloverBtn
 
--- CHỨC NĂNG 1: AUTO COLLECT CLOVERS
-MainTab:AddToggle({
-	Name = "Auto Collect Clovers",
-	Default = false,
-	Callback = function(Value)
-		AutoCollectClovers = Value
-        if AutoCollectClovers then
-            task.spawn(function()
-                while AutoCollectClovers do
-                    task.wait(0.1) -- Giữ delay nhỏ để máy không bị quá nhiệt
+ToggleCloverBtn.MouseButton1Click:Connect(function()
+    AutoCollectClovers = not AutoCollectClovers
+    if AutoCollectClovers then
+        ToggleCloverBtn.BackgroundColor3 = Color3.fromRGB(50, 160, 50) -- Xanh (ON)
+        ToggleCloverBtn.Text = "Clovers: ON"
+        
+        -- Vòng lặp tính năng
+        task.spawn(function()
+            while AutoCollectClovers do
+                task.wait(0.1)
+                local folder = workspace:FindFirstChild("Clovers")
+                if folder and getRoot() then
+                    for _, clover in ipairs(folder:GetChildren()) do
+                        if not AutoCollectClovers then break end
+                        local cf = clover:IsA("BasePart") and clover.CFrame or clover:IsA("Model") and (clover.PrimaryPart and clover.PrimaryPart.CFrame or clover:FindFirstChildWhichIsA("BasePart") and clover:FindFirstChildWhichIsA("BasePart").CFrame)
+                        if cf then
+                            pcall(function() getRoot().CFrame = cf end)
+                            task.wait(0.2)
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        ToggleCloverBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+        ToggleCloverBtn.Text = "Clovers: OFF"
+    end
+end)
+
+-- NÚT 2: AUTO PRAY
+TogglePrayBtn.Name = "TogglePrayBtn"
+TogglePrayBtn.Parent = MainFrame
+TogglePrayBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+TogglePrayBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
+TogglePrayBtn.Size = UDim2.new(0.9, 0, 0, 35)
+TogglePrayBtn.Font = Enum.Font.SourceSansBold
+TogglePrayBtn.Text = "Auto Pray: OFF"
+TogglePrayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TogglePrayBtn.TextSize = 13
+
+ButtonCorner2.CornerRadius = UDim.new(0, 5)
+ButtonCorner2.Parent = TogglePrayBtn
+
+TogglePrayBtn.MouseButton1Click:Connect(function()
+    AutoPray = not AutoPray
+    if AutoPray then
+        TogglePrayBtn.BackgroundColor3 = Color3.fromRGB(50, 160, 50)
+        TogglePrayBtn.Text = "Auto Pray: ON"
+        
+        -- Vòng lặp tính năng
+        task.spawn(function()
+            while AutoPray do
+                local part = workspace:FindFirstChild("Praypart", true)
+                if part and part:IsA("BasePart") and getRoot() then
+                    pcall(function() getRoot().CFrame = part.CFrame + Vector3.new(0, 3, 0) end)
+                    task.wait(0.5)
                     
-                    local cloversFolder = workspace:FindFirstChild("Clovers")
-                    if cloversFolder then
-                        local clovers = cloversFolder:GetChildren()
-                        
-                        for _, clover in ipairs(clovers) do
-                            if not AutoCollectClovers then break end
-                            
-                            local targetCFrame = nil
-                            if clover:IsA("BasePart") then
-                                targetCFrame = clover.CFrame
-                            elseif clover:IsA("Model") and clover.PrimaryPart then
-                                targetCFrame = clover.PrimaryPart.CFrame
-                            elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
+                    local prompt = part:FindFirstChildWhichIsA("ProximityPrompt") or part:FindFirstChild("ProximityPrompt", true)
+                    if prompt then
+                        pcall(function() fireproximityprompt(prompt) end)
+                    end
+                    
+                    for i = 1, 330 do
+                        if not AutoPray then break end
+                        task.wait(1)
+                    end
+                else
+                    task.wait(5)
+                end
+            end
+        end)
+    else
+        TogglePrayBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+        TogglePrayBtn.Text = "Auto Pray: OFF"
+    end
+end)
+
+-- Nhãn thông báo nhỏ bên dưới
+CreditLabel.Parent = MainFrame
+CreditLabel.Position = UDim2.new(0, 0, 0.8, 0)
+CreditLabel.Size = UDim2.new(1, 0, 0, 20)
+CreditLabel.Font = Enum.Font.SourceSans
+CreditLabel.Text = "Hold title to move GUI"
+CreditLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+CreditLabel.TextSize = 11
                                 targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
                             end
                             
