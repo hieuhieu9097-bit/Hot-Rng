@@ -1,23 +1,35 @@
 -- [[ FORTUNA X - HOT RNG SCRIPT ]]
--- UI Framework: Obsidian UI (Modded Version)
+-- UI Framework: LinoriaLib (Modified by deivid)
 -- Optimized for Mobile Executors
 
--- 1. KHỞI TẠO OBSIDIAN UI LIBRARY
-local Obsidian = loadstring(game:HttpGet("https://raw.githubusercontent.com/tanhoangviet/Obsidian-UI-Modded/main/source.lua"))()
+-- 1. KHỞI TẠO THƯ VIỆN LINORIALIB & ADDONS
+local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
--- Tạo Cửa sổ giao diện chính
-local Window = Obsidian:CreateWindow({
-    Title = "Fortuna X | Hot RNG",
-    Theme = "Dark", -- Giao diện tối giúp dịu mắt và đỡ lag mobile
-    Size = UDim2.new(0, 340, 0, 240) -- Kích thước vừa vặn cho màn hình điện thoại
+-- Thiết lập cấu hình tối ưu cho người dùng Mobile
+Library.ForceCheckbox = false 
+Library.ShowToggleFrameInKeybinds = true 
+
+-- Tạo Cửa sổ giao diện chính (Window)
+local Window = Library:CreateWindow({
+	Title = "Fortuna X | Hot RNG",
+	Footer = "Version: 1.0.0",
+	Icon = 95816097006870,
+	NotifySide = "Right",
+	ShowCustomCursor = false, -- Tắt cursor tùy chỉnh để đỡ loạn cảm ứng trên Mobile
 })
 
--- Tạo một Tab chính chứa các tính năng
-local MainTab = Window:CreateTab("Main")
+-- Khởi tạo các Tab
+local Tabs = {
+	Main = Window:AddTab("Main", "user"),
+	["UI Settings"] = Window:AddTab("UI Settings", "settings"),
+}
 
--- Các biến trạng thái hoạt động (Toggles)
-local AutoCollectClovers = false
-local AutoPray = false
+-- Tạo các Groupbox chia cột theo chuẩn Linoria
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Main Features", "boxes")
+local RightGroupBox = Tabs.Main:AddRightGroupbox("Status Info")
 
 -- Lấy thông tin người chơi
 local Player = game.Players.LocalPlayer
@@ -31,43 +43,165 @@ local function getRoot()
 end
 
 -- ==========================================
--- CÀI ĐẶT CÁC CHỨC NĂNG (OBSIDIAN SYNTAX)
+-- CÀI ĐẶT CÁC TÍNH NĂNG CHÍNH (MAIN FEATURES)
 -- ==========================================
 
 -- CHỨC NĂNG 1: AUTO COLLECT CLOVERS
-MainTab:CreateToggle({
-    Title = "Auto Collect Clovers",
-    Default = false,
-    Callback = function(Value)
-        AutoCollectClovers = Value
-        if AutoCollectClovers then
-            task.spawn(function()
-                while AutoCollectClovers do
-                    task.wait(0.1)
+LeftGroupBox:AddToggle("CloverToggle", {
+	Text = "Auto Collect Clovers",
+	Default = false,
+	Tooltip = "Tự động dịch chuyển nhặt toàn bộ vật phẩm trong folder Clovers",
+})
+
+-- Xử lý Logic cho Auto Collect Clovers bằng :OnChanged đúng khuyến nghị của thư viện
+Library.Toggles.CloverToggle:OnChanged(function()
+    local state = Library.Toggles.CloverToggle.Value
+    if state then
+        task.spawn(function()
+            while Library.Toggles.CloverToggle.Value do
+                task.wait(0.1)
+                
+                local cloversFolder = workspace:FindFirstChild("Clovers")
+                if cloversFolder then
+                    local clovers = cloversFolder:GetChildren()
                     
-                    local cloversFolder = workspace:FindFirstChild("Clovers")
-                    if cloversFolder then
-                        local clovers = cloversFolder:GetChildren()
+                    for _, clover in ipairs(clovers) do
+                        if not Library.Toggles.CloverToggle.Value then break end
                         
-                        for _, clover in ipairs(clovers) do
-                            if AutoCollectClovers then
-                                local targetCFrame = nil
-                                if clover:IsA("BasePart") then
-                                    targetCFrame = clover.CFrame
-                                elseif clover:IsA("Model") and clover.PrimaryPart then
-                                    targetCFrame = clover.PrimaryPart.CFrame
-                                elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
-                                    targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
-                                end
-                                
-                                -- Dịch chuyển tức thời
-                                if targetCFrame then
-                                    pcall(function()
-                                        getRoot().CFrame = targetCFrame
-                                    end)
-                                    task.wait(0.2) -- Khựng lại một chút để game kịp lưu dữ liệu nhận Clover
-                                end
-                            else
+                        local targetCFrame = nil
+                        if clover:IsA("BasePart") then
+                            targetCFrame = clover.CFrame
+                        elseif clover:IsA("Model") and clover.PrimaryPart then
+                            targetCFrame = clover.PrimaryPart.CFrame
+                        elseif clover:IsA("Model") and clover:FindFirstChildWhichIsA("BasePart") then
+                            targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
+                        end
+                        
+                        -- Thực hiện dịch chuyển tức thời (Instant Teleport)
+                        if targetCFrame then
+                            pcall(function()
+                                getRoot().CFrame = targetCFrame
+                            end)
+                            task.wait(0.2) -- Khựng lại một chút để game đồng bộ dữ liệu nhận Clover
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- CHỨC NĂNG 2: AUTO PRAY
+LeftGroupBox:AddToggle("PrayToggle", {
+	Text = "Auto Pray",
+	Default = false,
+	Tooltip = "Teleport tới Praypart, tự bấm nút tương tác và tự động chờ 330 giây",
+})
+
+-- Xử lý Logic cho Auto Pray bằng :OnChanged
+Library.Toggles.PrayToggle:OnChanged(function()
+    local state = Library.Toggles.PrayToggle.Value
+    if state then
+        task.spawn(function()
+            while Library.Toggles.PrayToggle.Value do
+                -- Tìm kiếm sâu vật thể có tên Praypart trong Workspace
+                local prayPart = workspace:FindFirstChild("Praypart", true)
+                
+                if prayPart and prayPart:IsA("BasePart") then
+                    -- 1. Teleport lập tức tới vị trí Praypart
+                    pcall(function()
+                        getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) -- Cao hơn 3 block tránh kẹt đất
+                    end)
+                    task.wait(0.5) -- Đợi nhân vật ổn định vị trí sau khi dịch chuyển
+                    
+                    -- 2. Tìm và kích hoạt ProximityPrompt để tương tác cầu nguyện
+                    local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
+                    if prompt then
+                        pcall(function()
+                            fireproximityprompt(prompt)
+                        end)
+                    end
+                    
+                    -- 3. Vòng lặp đếm ngược 330 giây (Có thể ngắt ngay lập tức khi tắt Toggle)
+                    for i = 1, 330 do
+                        if not Library.Toggles.PrayToggle.Value then break end
+                        task.wait(1)
+                    end
+                else
+                    -- Nếu không tìm thấy Praypart trên bản đồ, đợi 5 giây rồi quét lại
+                    task.wait(5)
+                end
+            end
+        end)
+    end
+end)
+
+-- BẢNG THÔNG TIN PHỤ Ở CỘT PHẢI
+RightGroupBox:AddLabel("Script Status: Active")
+RightGroupBox:AddLabel("Framework: Linoria Modded")
+RightGroupBox:AddDivider()
+RightGroupBox:AddLabel("Chúc bạn chơi game vui vẻ!")
+
+-- ==========================================
+-- CÀI ĐẶT HỆ THỐNG CỦA THƯ VIỆN (UI SETTINGS)
+-- ==========================================
+local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu Settings", "wrench")
+
+MenuGroup:AddToggle("KeybindMenuOpen", {
+	Default = Library.KeybindFrame.Visible,
+	Text = "Open Keybind Menu",
+	Callback = function(value)
+		Library.KeybindFrame.Visible = value
+	end,
+})
+
+MenuGroup:AddDropdown("NotificationSide", {
+	Values = { "Left", "Right" },
+	Default = "Right",
+	Text = "Notification Side",
+	Callback = function(Value)
+		Library:SetNotifySide(Value)
+	end,
+})
+
+MenuGroup:AddDropdown("DPIDropdown", {
+	Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
+	Default = "100%",
+	Text = "DPI Scale (Mobile Optimize)",
+	Callback = function(Value)
+		Value = Value:gsub("%%", "")
+		local DPI = tonumber(Value)
+		Library:SetDPIScale(DPI)
+	end,
+})
+
+MenuGroup:AddDivider()
+MenuGroup:AddLabel("Menu Bind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
+Library.ToggleKeybind = Options.MenuKeybind 
+
+MenuGroup:AddButton("Unload Script", function()
+	Library:Unload()
+end)
+
+-- Tự động thiết lập cấu hình lưu trữ
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
+
+ThemeManager:SetFolder("FortunaX")
+SaveManager:SetFolder("FortunaX/HotRNG")
+
+SaveManager:BuildConfigSection(Tabs["UI Settings"])
+ThemeManager:ApplyToTab(Tabs["UI Settings"])
+SaveManager:LoadAutoloadConfig()
+
+-- Gửi thông báo khởi chạy thành công
+Library:Notify({
+    Title = "Fortuna X",
+    Description = "Script loaded successfully with Linoria UI!",
+    Time = 5,
+})
                                 break
                             end
                         end
