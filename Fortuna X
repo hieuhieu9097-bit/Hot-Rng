@@ -1,13 +1,18 @@
 -- [[ FORTUNA X - HOT RNG SCRIPT ]]
--- Optimized for Mobile Executors (Delta, Codex, Fluxus, Hydrogen)
--- UI Framework: Rayfield
+-- Tối ưu hóa: Sửa lỗi hiển thị trên Mobile Executor (Delta, Codex, Hydrogen, Fluxus)
+-- UI Framework: Rayfield (Updated Library Link)
 
--- 1. KHỞI TẠO RAYFIELD LIBRARY
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- 0. Xóa GUI cũ nếu có để tránh xung đột không hiện giao diện
+if game:GetService("CoreGui"):FindFirstChild("Rayfield") then
+    game:GetService("CoreGui").Rayfield:Destroy()
+end
+
+-- 1. KHỞI TẠO RAYFIELD LIBRARY (Link phiên bản ổn định cho Mobile)
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftware-Design/Rayfield/main/source.lua'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Fortuna X",
-   LoadingTitle = "Loading Fortuna X...",
+   LoadingTitle = "Fortuna X Loading...",
    LoadingSubtitle = "by Gemini Coder",
    ConfigurationSaving = {
       Enabled = false
@@ -15,7 +20,7 @@ local Window = Rayfield:CreateWindow({
    Discord = {
       Enabled = false
    },
-   KeySystem = false
+   KeySystem = false -- Tắt hệ thống Key để vào thẳng giao diện trên điện thoại
 })
 
 -- Các biến trạng thái hoạt động (Toggles)
@@ -37,7 +42,7 @@ end
 -- TABS & UI SECTIONS
 -- ==========================================
 
-local MainTab = Window:CreateTab("Main Features", 4483362458) -- Icon ID mặc định
+local MainTab = Window:CreateTab("Main Features", nil) -- Để 'nil' để dùng icon mặc định của Rayfield, tránh lỗi tải Asset ID
 
 -- CHỨC NĂNG 1: AUTO COLLECT CLOVERS
 MainTab:CreateToggle({
@@ -51,13 +56,11 @@ MainTab:CreateToggle({
               while AutoCollectClovers do
                   task.wait(0.1) -- Vòng lặp quét liên tục
                   
-                  -- Tìm folder Clovers trong Workspace
                   local cloversFolder = workspace:FindFirstChild("Clovers")
                   if cloversFolder then
                       local clovers = cloversFolder:GetChildren()
                       
                       for _, clover in ipairs(clovers) do
-                          -- Kiểm tra nếu vật phẩm là BasePart hoặc Model có PrimaryPart để dịch chuyển tới
                           if AutoCollectClovers then
                               local targetCFrame = nil
                               if clover:IsA("BasePart") then
@@ -68,6 +71,78 @@ MainTab:CreateToggle({
                                   targetCFrame = clover:FindFirstChildWhichIsA("BasePart").CFrame
                               end
                               
+                              -- Thực hiện dịch chuyển tức thời
+                              if targetCFrame then
+                                  pcall(function()
+                                      getRoot().CFrame = targetCFrame
+                                  end)
+                                  task.wait(0.2) -- Đợi 0.2s để game kịp nhận Clover
+                              end
+                          else
+                              break
+                          end
+                      end
+                  end
+              end
+          end)
+      end
+   end,
+})
+
+-- CHỨC NĂNG 2: AUTO PRAY
+MainTab:CreateToggle({
+   Name = "Auto Pray",
+   CurrentValue = false,
+   Flag = "PrayToggle",
+   Callback = function(Value)
+      AutoPray = Value
+      if AutoPray then
+          task.spawn(function()
+              while AutoPray do
+                  -- Tìm kiếm sâu (quét đệ quy) trong Workspace để tìm Praypart
+                  local prayPart = workspace:FindFirstChild("Praypart", true)
+                  
+                  if prayPart and prayPart:IsA("BasePart") then
+                      -- 1. Teleport lập tức tới Praypart
+                      pcall(function()
+                          getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) -- Cao hơn 3 block tránh kẹt đất
+                      end)
+                      task.wait(0.5) -- Đợi nhân vật ổn định vị trí
+                      
+                      -- 2. Tìm và kích hoạt ProximityPrompt
+                      local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
+                      if prompt then
+                          pcall(function()
+                              fireproximityprompt(prompt) -- Kích hoạt nút tương tác
+                          end)
+                      end
+                      
+                      -- 3. Đếm ngược 330 giây (có thể ngắt ngay khi tắt toggle)
+                      for i = 1, 330 do
+                          if not AutoPray then break end
+                          task.wait(1)
+                      end
+                  else
+                      -- Nếu không thấy Part, đợi 5 giây rồi tìm lại để tránh sập script
+                      task.wait(5)
+                  end
+              end
+          end)
+      end
+   end,
+})
+
+-- THÔNG TIN PHIÊN BẢN (CREDITS)
+local InfoSection = MainTab:CreateSection("Status")
+MainTab:CreateLabel("Fortuna X Loaded Successfully!")
+
+-- Gửi thông báo nhỏ góc màn hình khi nạp thành công
+Rayfield:Notify({
+   Title = "Fortuna X",
+   Content = "Giao diện đã nạp thành công!",
+   Duration = 5,
+   Image = nil,
+})
                               -- Thực hiện dịch chuyển tức thời
                               if targetCFrame then
                                   pcall(function()
