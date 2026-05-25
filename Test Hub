@@ -439,12 +439,22 @@ Watermark.TextSize = 10
 local FloatingBtn = Instance.new("ImageButton")
 FloatingBtn.Name = "FloatingBtn"
 FloatingBtn.Parent = ScreenGui
-FloatingBtn.BackgroundTransparency = 1
+FloatingBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+FloatingBtn.BackgroundTransparency = 0
 FloatingBtn.Position = UDim2.new(0, 15, 0, 120)
 FloatingBtn.Size = UDim2.new(0, 48, 0, 48)
 FloatingBtn.Image = "rbxassetid://74904830899994"
 FloatingBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 FloatingBtn.ScaleType = Enum.ScaleType.Fit
+
+local RoundCorner = Instance.new("UICorner")
+RoundCorner.CornerRadius = UDim.new(1, 0)
+RoundCorner.Parent = FloatingBtn
+
+local RoundStroke = Instance.new("UIStroke")
+RoundStroke.Color = Color3.fromRGB(60, 60, 65)
+RoundStroke.Thickness = 1.5
+RoundStroke.Parent = FloatingBtn
 
 local UiVisible = true
 FloatingBtn.MouseButton1Click:Connect(function()
@@ -452,7 +462,11 @@ FloatingBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = UiVisible
     if UiVisible then
         FloatingBtn.ImageTransparency = 0
+        RoundStroke.Color = Color3.fromRGB(60, 60, 65)
+        FloatingBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
     else
         FloatingBtn.ImageTransparency = 0.5
+        RoundStroke.Color = Color3.fromRGB(40, 40, 45)
+        FloatingBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
     end
 end)
