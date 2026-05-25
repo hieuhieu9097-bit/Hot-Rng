@@ -34,29 +34,29 @@ ScreenGui.ResetOnSpawn = false
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
 MainFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
 MainFrame.Size = UDim2.new(0, 380, 0, 185)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
 local FrameCorner = Instance.new("UICorner")
-FrameCorner.CornerRadius = UDim.new(0, 10)
+FrameCorner.CornerRadius = UDim.new(0, 8)
 FrameCorner.Parent = MainFrame
 
 local FrameStroke = Instance.new("UIStroke")
-FrameStroke.Color = Color3.fromRGB(0, 170, 255)
+FrameStroke.Color = Color3.fromRGB(60, 60, 65)
 FrameStroke.Thickness = 1.5
 FrameStroke.Parent = MainFrame
 
 local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
 TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+TopBar.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 TopBar.Size = UDim2.new(1, 0, 0, 35)
 
 local TopBarCorner = Instance.new("UICorner")
-TopBarCorner.CornerRadius = UDim.new(0, 10)
+TopBarCorner.CornerRadius = UDim.new(0, 8)
 TopBarCorner.Parent = TopBar
 
 local Title = Instance.new("TextLabel")
@@ -65,7 +65,7 @@ Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "FORTUNA X"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(240, 240, 245)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Center
 
@@ -84,7 +84,7 @@ StatusLog.Position = UDim2.new(0, 0, 0, 0)
 StatusLog.Size = UDim2.new(1, 0, 0, 18)
 StatusLog.Font = Enum.Font.Gotham
 StatusLog.Text = "Status: Idle"
-StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+StatusLog.TextColor3 = Color3.fromRGB(160, 160, 165)
 StatusLog.TextSize = 11
 StatusLog.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -108,7 +108,7 @@ TargetTitle.BackgroundTransparency = 1
 TargetTitle.Size = UDim2.new(0.5, 0, 1, 0)
 TargetTitle.Font = Enum.Font.GothamBold
 TargetTitle.Text = "EGG SELECTOR"
-TargetTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+TargetTitle.TextColor3 = Color3.fromRGB(140, 140, 145)
 TargetTitle.TextSize = 9
 TargetTitle.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -119,19 +119,19 @@ StatusTitle.Position = UDim2.new(0.5, 0, 0, 0)
 StatusTitle.Size = UDim2.new(0.5, 0, 1, 0)
 StatusTitle.Font = Enum.Font.GothamBold
 StatusTitle.Text = "STATUS"
-StatusTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+StatusTitle.TextColor3 = Color3.fromRGB(140, 140, 145)
 StatusTitle.TextSize = 9
 StatusTitle.TextXAlignment = Enum.TextXAlignment.Right
 
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Name = "ScrollFrame"
 ScrollFrame.Parent = RightColumn
-ScrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+ScrollFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
 ScrollFrame.Position = UDim2.new(0, 0, 0, 18)
 ScrollFrame.Size = UDim2.new(1, 0, 0, 100)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 160)
 ScrollFrame.ScrollBarThickness = 3
-ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(180, 180, 185)
 ScrollFrame.Active = true
 
 local MonitorCorner = Instance.new("UICorner")
@@ -139,7 +139,7 @@ MonitorCorner.CornerRadius = UDim.new(0, 6)
 MonitorCorner.Parent = ScrollFrame
 
 local MonitorStroke = Instance.new("UIStroke")
-MonitorStroke.Color = Color3.fromRGB(35, 35, 45)
+MonitorStroke.Color = Color3.fromRGB(30, 30, 35)
 MonitorStroke.Thickness = 1
 MonitorStroke.Parent = ScrollFrame
 
@@ -178,7 +178,7 @@ for name, displayName in pairs(eggDisplayNames) do
     SelectBtn.Size = UDim2.new(0.6, 0, 1, 0)
     SelectBtn.Font = Enum.Font.GothamSemibold
     SelectBtn.Text = " " .. displayName
-    SelectBtn.TextColor3 = Color3.fromRGB(140, 140, 150)
+    SelectBtn.TextColor3 = Color3.fromRGB(130, 130, 135)
     SelectBtn.TextSize = 10
     SelectBtn.TextXAlignment = Enum.TextXAlignment.Left
     eggButtons[name] = SelectBtn
@@ -192,7 +192,7 @@ for name, displayName in pairs(eggDisplayNames) do
     StatusLbl.Size = UDim2.new(0.4, -4, 1, 0)
     StatusLbl.Font = Enum.Font.GothamSemibold
     StatusLbl.Text = "Ignored"
-    StatusLbl.TextColor3 = Color3.fromRGB(100, 100, 110)
+    StatusLbl.TextColor3 = Color3.fromRGB(90, 90, 95)
     StatusLbl.TextSize = 10
     StatusLbl.TextXAlignment = Enum.TextXAlignment.Right
     statusLabels[name] = StatusLbl
@@ -201,13 +201,13 @@ for name, displayName in pairs(eggDisplayNames) do
         if StatusLbl.Text == "Picked up" then return end
         selectedEggs[name] = not selectedEggs[name]
         if selectedEggs[name] then
-            SelectBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+            SelectBtn.TextColor3 = Color3.fromRGB(240, 240, 245)
             StatusLbl.Text = "Waiting..."
-            StatusLbl.TextColor3 = Color3.fromRGB(255, 100, 100)
+            StatusLbl.TextColor3 = Color3.fromRGB(180, 130, 70)
         else
-            SelectBtn.TextColor3 = Color3.fromRGB(140, 140, 150)
+            SelectBtn.TextColor3 = Color3.fromRGB(130, 130, 135)
             StatusLbl.Text = "Ignored"
-            StatusLbl.TextColor3 = Color3.fromRGB(100, 100, 110)
+            StatusLbl.TextColor3 = Color3.fromRGB(90, 90, 95)
         end
     end)
 end
@@ -260,12 +260,12 @@ local function createToraToggle(name, text, yOffset, callback)
     local Button = Instance.new("TextButton")
     Button.Name = name
     Button.Parent = LeftColumn
-    Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    Button.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
     Button.Position = UDim2.new(0, 0, 0, yOffset)
     Button.Size = UDim2.new(1, 0, 0, 26)
     Button.Font = Enum.Font.GothamBold
     Button.Text = text .. " : [OFF]"
-    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Button.TextColor3 = Color3.fromRGB(150, 150, 155)
     Button.TextSize = 9
     
     local BtnCorner = Instance.new("UICorner")
@@ -273,7 +273,7 @@ local function createToraToggle(name, text, yOffset, callback)
     BtnCorner.Parent = Button
     
     local BtnStroke = Instance.new("UIStroke")
-    BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+    BtnStroke.Color = Color3.fromRGB(40, 40, 45)
     BtnStroke.Thickness = 1
     BtnStroke.Parent = Button
 
@@ -281,14 +281,14 @@ local function createToraToggle(name, text, yOffset, callback)
     Button.MouseButton1Click:Connect(function()
         active = not active
         if active then
-            Button.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
-            Button.TextColor3 = Color3.fromRGB(0, 200, 255)
-            BtnStroke.Color = Color3.fromRGB(0, 170, 255)
+            Button.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+            Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            BtnStroke.Color = Color3.fromRGB(140, 140, 145)
             Button.Text = text .. " : [ON]"
         else
-            Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-            Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-            BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+            Button.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+            Button.TextColor3 = Color3.fromRGB(150, 150, 155)
+            BtnStroke.Color = Color3.fromRGB(40, 40, 45)
             Button.Text = text .. " : [OFF]"
         end
         callback(active)
@@ -323,18 +323,18 @@ createToraToggle("PrayBtn", "Auto Pray", 55, function(state)
         task.spawn(function()
             while AutoPray do
                 StatusLog.Text = "Status: Scanning PrayPart..."
-                StatusLog.TextColor3 = Color3.fromRGB(255, 180, 0)
+                StatusLog.TextColor3 = Color3.fromRGB(200, 200, 205)
                 local prayPart = deepSearch(workspace, "PrayPart")
                 if prayPart and prayPart:IsA("BasePart") and getRoot() then
                     StatusLog.Text = "Status: Found! Teleporting..."
-                    StatusLog.TextColor3 = Color3.fromRGB(0, 200, 255)
+                    StatusLog.TextColor3 = Color3.fromRGB(240, 240, 245)
                     pcall(function() getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) end)
                     task.wait(0.5)
                     StatusLog.Text = "Status: Praying..."
                     local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
                     if prompt then
                         pcall(function() fireproximityprompt(prompt) end)
-                        StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+                        StatusLog.TextColor3 = Color3.fromRGB(255, 255, 255)
                         for i = 330, 1, -1 do
                             if not AutoPray then break end
                             local minutes = math.floor(i / 60)
@@ -344,17 +344,17 @@ createToraToggle("PrayBtn", "Auto Pray", 55, function(state)
                         end
                     else
                         StatusLog.Text = "Status: Error - No Prompt"
-                        StatusLog.TextColor3 = Color3.fromRGB(255, 50, 50)
+                        StatusLog.TextColor3 = Color3.fromRGB(180, 70, 70)
                         task.wait(4)
                     end
                 else
                     StatusLog.Text = "Status: Retrying Scan..."
-                    StatusLog.TextColor3 = Color3.fromRGB(255, 100, 100)
+                    StatusLog.TextColor3 = Color3.fromRGB(180, 70, 70)
                     task.wait(2)
                 end
             end
             StatusLog.Text = "Status: Disabled"
-            StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+            StatusLog.TextColor3 = Color3.fromRGB(150, 150, 155)
         end)
     end
 end)
@@ -372,7 +372,7 @@ createToraToggle("EggBtn", "Auto Egg", 86, function(state)
                         if obj:IsA("BasePart") and eggDisplayNames[obj.Name] and selectedEggs[obj.Name] then
                             if not CollectedEggs[obj] then
                                 StatusLog.Text = "Status: Found " .. obj.Name .. "!"
-                                StatusLog.TextColor3 = Color3.fromRGB(0, 200, 255)
+                                StatusLog.TextColor3 = Color3.fromRGB(200, 200, 205)
                                 pcall(function() getRoot().CFrame = obj.CFrame + Vector3.new(0, 2, 0) end)
                                 task.wait(0.4)
                                 local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt") or obj:FindFirstChild("ProximityPrompt", true)
@@ -383,11 +383,11 @@ createToraToggle("EggBtn", "Auto Egg", 86, function(state)
                                     local label = statusLabels[obj.Name]
                                     if label then
                                         label.Text = "Picked up"
-                                        label.TextColor3 = Color3.fromRGB(75, 255, 75)
+                                        label.TextColor3 = Color3.fromRGB(255, 255, 255)
                                     end
                                     
                                     StatusLog.Text = "Status: Collected " .. obj.Name
-                                    StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+                                    StatusLog.TextColor3 = Color3.fromRGB(240, 240, 245)
                                     
                                     task.spawn(function()
                                         task.wait(1800)
@@ -396,10 +396,10 @@ createToraToggle("EggBtn", "Auto Egg", 86, function(state)
                                             if label and AutoCollectEgg then
                                                 if selectedEggs[obj.Name] then
                                                     label.Text = "Waiting..."
-                                                    label.TextColor3 = Color3.fromRGB(255, 100, 100)
+                                                    label.TextColor3 = Color3.fromRGB(180, 130, 70)
                                                 else
                                                     label.Text = "Ignored"
-                                                    label.TextColor3 = Color3.fromRGB(100, 100, 110)
+                                                    label.TextColor3 = Color3.fromRGB(90, 90, 95)
                                                 end
                                             end
                                         end
@@ -417,10 +417,10 @@ createToraToggle("EggBtn", "Auto Egg", 86, function(state)
         for name, label in pairs(statusLabels) do
             if selectedEggs[name] then
                 label.Text = "Waiting..."
-                label.TextColor3 = Color3.fromRGB(255, 100, 100)
+                label.TextColor3 = Color3.fromRGB(180, 130, 70)
             else
                 label.Text = "Ignored"
-                label.TextColor3 = Color3.fromRGB(100, 100, 110)
+                label.TextColor3 = Color3.fromRGB(90, 90, 95)
             end
         end
     end
@@ -433,38 +433,26 @@ Watermark.Position = UDim2.new(0, 0, 0, 168)
 Watermark.Size = UDim2.new(1, 0, 0, 15)
 Watermark.Font = Enum.Font.SourceSansItalic
 Watermark.Text = "made by Second"
-Watermark.TextColor3 = Color3.fromRGB(120, 120, 130)
+Watermark.TextColor3 = Color3.fromRGB(100, 100, 105)
 Watermark.TextSize = 10
 
-local FloatingBtn = Instance.new("TextButton")
+local FloatingBtn = Instance.new("ImageButton")
 FloatingBtn.Name = "FloatingBtn"
 FloatingBtn.Parent = ScreenGui
-FloatingBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+FloatingBtn.BackgroundTransparency = 1
 FloatingBtn.Position = UDim2.new(0, 15, 0, 120)
-FloatingBtn.Size = UDim2.new(0, 45, 0, 45)
-FloatingBtn.Font = Enum.Font.GothamBold
-FloatingBtn.Text = "FX"
-FloatingBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
-FloatingBtn.TextSize = 14
-
-local RoundCorner = Instance.new("UICorner")
-RoundCorner.CornerRadius = UDim.new(1, 0)
-RoundCorner.Parent = FloatingBtn
-
-local RoundStroke = Instance.new("UIStroke")
-RoundStroke.Color = Color3.fromRGB(0, 170, 255)
-RoundStroke.Thickness = 2
-RoundStroke.Parent = FloatingBtn
+FloatingBtn.Size = UDim2.new(0, 48, 0, 48)
+FloatingBtn.Image = "rbxassetid://74904830899994"
+FloatingBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
+FloatingBtn.ScaleType = Enum.ScaleType.Fit
 
 local UiVisible = true
 FloatingBtn.MouseButton1Click:Connect(function()
     UiVisible = not UiVisible
     MainFrame.Visible = UiVisible
     if UiVisible then
-        FloatingBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
-        RoundStroke.Color = Color3.fromRGB(0, 170, 255)
+        FloatingBtn.ImageTransparency = 0
     else
-        FloatingBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-        RoundStroke.Color = Color3.fromRGB(60, 60, 70)
+        FloatingBtn.ImageTransparency = 0.5
     end
 end)
