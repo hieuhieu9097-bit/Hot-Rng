@@ -36,7 +36,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
-MainFrame.Size = UDim2.new(0, 240, 0, 420)
+MainFrame.Size = UDim2.new(0, 240, 0, 310)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -68,6 +68,347 @@ Title.Text = "FORTUNA X"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Center
+
+local StatusLog = Instance.new("TextLabel")
+StatusLog.Name = "StatusLog"
+StatusLog.Parent = MainFrame
+StatusLog.BackgroundTransparency = 1
+StatusLog.Position = UDim2.new(0.05, 0, 0.41, 0)
+StatusLog.Size = UDim2.new(0.9, 0, 0, 20)
+StatusLog.Font = Enum.Font.Gotham
+StatusLog.Text = "Status: Idle"
+StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+StatusLog.TextSize = 11
+StatusLog.TextXAlignment = Enum.TextXAlignment.Left
+
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Name = "ScrollFrame"
+ScrollFrame.Parent = MainFrame
+ScrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+ScrollFrame.Position = UDim2.new(0.05, 0, 0.49, 0)
+ScrollFrame.Size = UDim2.new(0.9, 0, 0, 120)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 175)
+ScrollFrame.ScrollBarThickness = 3
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+ScrollFrame.Active = true
+
+local MonitorCorner = Instance.new("UICorner")
+MonitorCorner.CornerRadius = UDim.new(0, 6)
+MonitorCorner.Parent = ScrollFrame
+
+local MonitorStroke = Instance.new("UIStroke")
+MonitorStroke.Color = Color3.fromRGB(35, 35, 45)
+MonitorStroke.Thickness = 1
+MonitorStroke.Parent = ScrollFrame
+
+local MonitorList = Instance.new("UIListLayout")
+MonitorList.Parent = ScrollFrame
+MonitorList.SortOrder = Enum.SortOrder.LayoutOrder
+MonitorList.Padding = UDim.new(0, 2)
+
+local eggLabels = {}
+local selectedEggs = {}
+local eggDisplayNames = {
+    ["EggPrompt_Spring"] = "Spring Eggs",
+    ["EggPrompt_Cosmical"] = "Cosmical Eggs",
+    ["EggPrompt_Ocean"] = "Ocean Eggs",
+    ["EggPrompt_Summer"] = "Summer Eggs",
+    ["EggPrompt_Celestic"] = "Celestic Eggs",
+    ["EggPrompt_Inverted"] = "Inverted Eggs",
+    ["EggPrompt_Fantasy"] = "Fantasy Eggs",
+    ["EggPrompt_Winter"] = "Winter Eggs",
+    ["EggPrompt_Autumn"] = "Autumn Eggs",
+    ["EggPrompt_Collapse"] = "Collapse Eggs"
+}
+
+for name, displayName in pairs(eggDisplayNames) do
+    local Label = Instance.new("TextButton")
+    Label.Name = name
+    Label.Parent = ScrollFrame
+    Label.BackgroundTransparency = 1
+    Label.Size = UDim2.new(1, -10, 0, 15)
+    Label.Font = Enum.Font.GothamSemibold
+    Label.Text = "  " .. displayName .. ": Ignored"
+    Label.TextColor3 = Color3.fromRGB(140, 140, 150)
+    Label.TextSize = 10
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    eggLabels[name] = Label
+    selectedEggs[name] = false
+
+    Label.MouseButton1Click:Connect(function()
+        if Label.Text:find("Picked up") then return end
+        selectedEggs[name] = not selectedEggs[name]
+        if selectedEggs[name] then
+            Label.Text = "  " .. displayName .. ": Selected"
+            Label.TextColor3 = Color3.fromRGB(255, 200, 0)
+        else
+            Label.Text = "  " .. displayName .. ": Ignored"
+            Label.TextColor3 = Color3.fromRGB(140, 140, 150)
+        end
+    end)
+end
+
+local AutoCollectClovers = false
+local AutoPray = false
+local AutoCollectEgg = false
+local CollectedEggs = {}
+
+local Player = game.Players.LocalPlayer
+local function getRoot()
+    return Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function deepSearch(root, name)
+    local found = root:FindFirstChild(name, true)
+    if found then return found end
+    
+    for _, child in ipairs(root:GetChildren()) do
+        local s, res = pcall(function() return child:FindFirstChild(name, true) end)
+        if s and res then return res end
+        
+        if child:IsA("Folder") or child:IsA("Model") or child:IsA("Configuration") then
+            local deepRes = deepSearch(child, name)
+            if deepRes then return deepRes end
+        end
+    end
+    return nil
+end
+
+local function scanAllWorkspaceForEggs()
+    local results = {}
+    for _, child in ipairs(workspace:GetChildren()) do
+        for eggName, _ in pairs(eggDisplayNames) do
+            if child.Name == eggName then
+                table.insert(results, child)
+            end
+        end
+        
+        local s, desc = pcall(function() return child:GetDescendants() end)
+        if s and desc then
+            for _, d in ipairs(desc) do
+                if eggDisplayNames[d.Name] then
+                    table.insert(results, d)
+                end
+            end
+        end
+    end
+    return results
+end
+
+local function createToraToggle(name, text, pos, callback)
+    local Button = Instance.new("TextButton")
+    Button.Name = name
+    Button.Parent = MainFrame
+    Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    Button.Position = pos
+    Button.Size = UDim2.new(0.9, 0, 0, 30)
+    Button.Font = Enum.Font.GothamBold
+    Button.Text = text .. " : [OFF]"
+    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Button.TextSize = 11
+    
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = Button
+    
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+    BtnStroke.Thickness = 1
+    BtnStroke.Parent = Button
+
+    local active = false
+    Button.MouseButton1Click:Connect(function()
+        active = not active
+        if active then
+            Button.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
+            Button.TextColor3 = Color3.fromRGB(0, 200, 255)
+            BtnStroke.Color = Color3.fromRGB(0, 170, 255)
+            Button.Text = text .. " : [ON]"
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+            Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+            BtnStroke.Color = Color3.fromRGB(40, 40, 50)
+            Button.Text = text .. " : [OFF]"
+        end
+        callback(active)
+    end)
+end
+
+createToraToggle("CloverBtn", "Auto Collect Clovers", UDim2.new(0.05, 0, 0.13, 0), function(state)
+    AutoCollectClovers = state
+    if AutoCollectClovers then
+        task.spawn(function()
+            while AutoCollectClovers do
+                task.wait(0.1)
+                local folder = workspace:FindFirstChild("Clovers")
+                if folder and getRoot() then
+                    for _, clover in ipairs(folder:GetChildren()) do
+                        if not AutoCollectClovers then break end
+                        local cf = clover:IsA("BasePart") and clover.CFrame or clover:IsA("Model") and (clover.PrimaryPart and clover.PrimaryPart.CFrame or clover:FindFirstChildWhichIsA("BasePart") and clover:FindFirstChildWhichIsA("BasePart").CFrame)
+                        if cf then
+                            pcall(function() getRoot().CFrame = cf end)
+                            task.wait(0.2)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+createToraToggle("PrayBtn", "Auto Pray", UDim2.new(0.05, 0, 0.22, 0), function(state)
+    AutoPray = state
+    if AutoPray then
+        task.spawn(function()
+            while AutoPray do
+                StatusLog.Text = "Status: Scanning PrayPart..."
+                StatusLog.TextColor3 = Color3.fromRGB(255, 180, 0)
+                
+                local prayPart = deepSearch(workspace, "PrayPart")
+                
+                if prayPart and prayPart:IsA("BasePart") and getRoot() then
+                    StatusLog.Text = "Status: Found! Teleporting..."
+                    StatusLog.TextColor3 = Color3.fromRGB(0, 200, 255)
+                    pcall(function() getRoot().CFrame = prayPart.CFrame + Vector3.new(0, 3, 0) end)
+                    task.wait(0.5)
+                    StatusLog.Text = "Status: Praying..."
+                    local prompt = prayPart:FindFirstChildWhichIsA("ProximityPrompt") or prayPart:FindFirstChild("ProximityPrompt", true)
+                    if prompt then
+                        pcall(function() fireproximityprompt(prompt) end)
+                        StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+                        for i = 330, 1, -1 do
+                            if not AutoPray then break end
+                            local minutes = math.floor(i / 60)
+                            local seconds = i % 60
+                            StatusLog.Text = "Status: " .. minutes .. "m" .. seconds .. "s"
+                            task.wait(1)
+                        end
+                    else
+                        StatusLog.Text = "Status: Error - No Prompt"
+                        StatusLog.TextColor3 = Color3.fromRGB(255, 50, 50)
+                        task.wait(4)
+                    end
+                else
+                    StatusLog.Text = "Status: Retrying Scan..."
+                    StatusLog.TextColor3 = Color3.fromRGB(255, 100, 100)
+                    task.wait(2)
+                end
+            end
+            StatusLog.Text = "Status: Disabled"
+            StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+        end)
+    end
+end)
+
+createToraToggle("EggBtn", "Auto Collect Egg", UDim2.new(0.05, 0, 0.31, 0), function(state)
+    AutoCollectEgg = state
+    if AutoCollectEgg then
+        task.spawn(function()
+            while AutoCollectEgg do
+                task.wait(0.5)
+                if getRoot() then
+                    local allEggs = scanAllWorkspaceForEggs()
+                    for _, obj in ipairs(allEggs) do
+                        if not AutoCollectEgg then break end
+                        if obj:IsA("BasePart") and eggDisplayNames[obj.Name] and selectedEggs[obj.Name] then
+                            if not CollectedEggs[obj] then
+                                StatusLog.Text = "Status: Found " .. obj.Name .. "!"
+                                StatusLog.TextColor3 = Color3.fromRGB(0, 200, 255)
+                                pcall(function() getRoot().CFrame = obj.CFrame + Vector3.new(0, 2, 0) end)
+                                task.wait(0.4)
+                                local prompt = obj:FindFirstChildWhichIsA("ProximityPrompt") or obj:FindFirstChild("ProximityPrompt", true)
+                                if prompt then
+                                    pcall(function() fireproximityprompt(prompt) end)
+                                    CollectedEggs[obj] = true
+                                    
+                                    local label = eggLabels[obj.Name]
+                                    if label then
+                                        label.Text = "  " .. eggDisplayNames[obj.Name] .. ": Picked up"
+                                        label.TextColor3 = Color3.fromRGB(75, 255, 75)
+                                    end
+                                    
+                                    StatusLog.Text = "Status: Collected " .. obj.Name
+                                    StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+                                    
+                                    task.spawn(function()
+                                        task.wait(1800)
+                                        if CollectedEggs[obj] then
+                                            CollectedEggs[obj] = nil
+                                            if label and AutoCollectEgg then
+                                                if selectedEggs[obj.Name] then
+                                                    label.Text = "  " .. eggDisplayNames[obj.Name] .. ": Selected"
+                                                    label.TextColor3 = Color3.fromRGB(255, 200, 0)
+                                                else
+                                                    label.Text = "  " .. eggDisplayNames[obj.Name] .. ": Ignored"
+                                                    label.TextColor3 = Color3.fromRGB(140, 140, 150)
+                                                end
+                                            end
+                                        end
+                                    end)
+                                    task.wait(1)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        CollectedEggs = {}
+        for name, label in pairs(eggLabels) do
+            if selectedEggs[name] then
+                label.Text = "  " .. eggDisplayNames[name] .. ": Selected"
+                label.TextColor3 = Color3.fromRGB(255, 200, 0)
+            else
+                label.Text = "  " .. eggDisplayNames[name] .. ": Ignored"
+                label.TextColor3 = Color3.fromRGB(140, 140, 150)
+            end
+        end
+    end
+end)
+
+local Watermark = Instance.new("TextLabel")
+Watermark.Parent = MainFrame
+Watermark.BackgroundTransparency = 1
+Watermark.Position = UDim2.new(0, 0, 0.92, 0)
+Watermark.Size = UDim2.new(1, 0, 0, 20)
+Watermark.Font = Enum.Font.SourceSansItalic
+Watermark.Text = "made by Second"
+Watermark.TextColor3 = Color3.fromRGB(120, 120, 130)
+Watermark.TextSize = 11
+
+local FloatingBtn = Instance.new("TextButton")
+FloatingBtn.Name = "FloatingBtn"
+FloatingBtn.Parent = ScreenGui
+FloatingBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+FloatingBtn.Position = UDim2.new(0, 15, 0, 120)
+FloatingBtn.Size = UDim2.new(0, 45, 0, 45)
+FloatingBtn.Font = Enum.Font.GothamBold
+FloatingBtn.Text = "FX"
+FloatingBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
+FloatingBtn.TextSize = 14
+
+local RoundCorner = Instance.new("UICorner")
+RoundCorner.CornerRadius = UDim.new(1, 0)
+RoundCorner.Parent = FloatingBtn
+
+local RoundStroke = Instance.new("UIStroke")
+RoundStroke.Color = Color3.fromRGB(0, 170, 255)
+RoundStroke.Thickness = 2
+RoundStroke.Parent = FloatingBtn
+
+local UiVisible = true
+FloatingBtn.MouseButton1Click:Connect(function()
+    UiVisible = not UiVisible
+    MainFrame.Visible = UiVisible
+    if UiVisible then
+        FloatingBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
+        RoundStroke.Color = Color3.fromRGB(0, 170, 255)
+    else
+        FloatingBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        RoundStroke.Color = Color3.fromRGB(60, 60, 70)
+    end
+end)
 
 local StatusLog = Instance.new("TextLabel")
 StatusLog.Name = "StatusLog"
