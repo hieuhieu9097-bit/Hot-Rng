@@ -36,7 +36,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
-MainFrame.Size = UDim2.new(0, 260, 0, 310)
+MainFrame.Size = UDim2.new(0, 380, 0, 185)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -69,24 +69,38 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Center
 
+local LeftColumn = Instance.new("Frame")
+LeftColumn.Name = "LeftColumn"
+LeftColumn.Parent = MainFrame
+LeftColumn.BackgroundTransparency = 1
+LeftColumn.Position = UDim2.new(0.04, 0, 0, 45)
+LeftColumn.Size = UDim2.new(0.44, 0, 0, 120)
+
 local StatusLog = Instance.new("TextLabel")
 StatusLog.Name = "StatusLog"
-StatusLog.Parent = MainFrame
+StatusLog.Parent = LeftColumn
 StatusLog.BackgroundTransparency = 1
-StatusLog.Position = UDim2.new(0.05, 0, 0.41, 0)
-StatusLog.Size = UDim2.new(0.9, 0, 0, 20)
+StatusLog.Position = UDim2.new(0, 0, 0, 0)
+StatusLog.Size = UDim2.new(1, 0, 0, 18)
 StatusLog.Font = Enum.Font.Gotham
 StatusLog.Text = "Status: Idle"
 StatusLog.TextColor3 = Color3.fromRGB(0, 255, 150)
 StatusLog.TextSize = 11
 StatusLog.TextXAlignment = Enum.TextXAlignment.Left
 
+local RightColumn = Instance.new("Frame")
+RightColumn.Name = "RightColumn"
+RightColumn.Parent = MainFrame
+RightColumn.BackgroundTransparency = 1
+RightColumn.Position = UDim2.new(0.52, 0, 0, 45)
+RightColumn.Size = UDim2.new(0.44, 0, 0, 120)
+
 local TableHeader = Instance.new("Frame")
 TableHeader.Name = "TableHeader"
-TableHeader.Parent = MainFrame
+TableHeader.Parent = RightColumn
 TableHeader.BackgroundTransparency = 1
-TableHeader.Position = UDim2.new(0.05, 0, 0.48, 0)
-TableHeader.Size = UDim2.new(0.9, 0, 0, 15)
+TableHeader.Position = UDim2.new(0, 0, 0, 0)
+TableHeader.Size = UDim2.new(1, 0, 0, 15)
 
 local TargetTitle = Instance.new("TextLabel")
 TargetTitle.Parent = TableHeader
@@ -111,10 +125,10 @@ StatusTitle.TextXAlignment = Enum.TextXAlignment.Right
 
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Name = "ScrollFrame"
-ScrollFrame.Parent = MainFrame
+ScrollFrame.Parent = RightColumn
 ScrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-ScrollFrame.Position = UDim2.new(0.05, 0, 0.54, 0)
-ScrollFrame.Size = UDim2.new(0.9, 0, 0, 105)
+ScrollFrame.Position = UDim2.new(0, 0, 0, 18)
+ScrollFrame.Size = UDim2.new(1, 0, 0, 100)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 160)
 ScrollFrame.ScrollBarThickness = 3
 ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
@@ -161,9 +175,9 @@ for name, displayName in pairs(eggDisplayNames) do
     SelectBtn.Name = "SelectBtn"
     SelectBtn.Parent = RowFrame
     SelectBtn.BackgroundTransparency = 1
-    SelectBtn.Size = UDim2.new(0.5, 0, 1, 0)
+    SelectBtn.Size = UDim2.new(0.6, 0, 1, 0)
     SelectBtn.Font = Enum.Font.GothamSemibold
-    SelectBtn.Text = "  " .. displayName
+    SelectBtn.Text = " " .. displayName
     SelectBtn.TextColor3 = Color3.fromRGB(140, 140, 150)
     SelectBtn.TextSize = 10
     SelectBtn.TextXAlignment = Enum.TextXAlignment.Left
@@ -174,8 +188,8 @@ for name, displayName in pairs(eggDisplayNames) do
     StatusLbl.Name = "StatusLbl"
     StatusLbl.Parent = RowFrame
     StatusLbl.BackgroundTransparency = 1
-    StatusLbl.Position = UDim2.new(0.5, 0, 0, 0)
-    StatusLbl.Size = UDim2.new(0.5, -6, 1, 0)
+    StatusLbl.Position = UDim2.new(0.6, 0, 0, 0)
+    StatusLbl.Size = UDim2.new(0.4, -4, 1, 0)
     StatusLbl.Font = Enum.Font.GothamSemibold
     StatusLbl.Text = "Ignored"
     StatusLbl.TextColor3 = Color3.fromRGB(100, 100, 110)
@@ -242,20 +256,20 @@ local function scanAllWorkspaceForEggs()
     return results
 end
 
-local function createToraToggle(name, text, pos, callback)
+local function createToraToggle(name, text, yOffset, callback)
     local Button = Instance.new("TextButton")
     Button.Name = name
-    Button.Parent = MainFrame
+    Button.Parent = LeftColumn
     Button.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-    Button.Position = pos
-    Button.Size = UDim2.new(0.9, 0, 0, 30)
+    Button.Position = UDim2.new(0, 0, 0, yOffset)
+    Button.Size = UDim2.new(1, 0, 0, 26)
     Button.Font = Enum.Font.GothamBold
     Button.Text = text .. " : [OFF]"
     Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Button.TextSize = 11
+    Button.TextSize = 9
     
     local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.CornerRadius = UDim.new(0, 5)
     BtnCorner.Parent = Button
     
     local BtnStroke = Instance.new("UIStroke")
@@ -281,7 +295,7 @@ local function createToraToggle(name, text, pos, callback)
     end)
 end
 
-createToraToggle("CloverBtn", "Auto Collect Clovers", UDim2.new(0.05, 0, 0.13, 0), function(state)
+createToraToggle("CloverBtn", "Auto Clovers", 24, function(state)
     AutoCollectClovers = state
     if AutoCollectClovers then
         task.spawn(function()
@@ -303,7 +317,7 @@ createToraToggle("CloverBtn", "Auto Collect Clovers", UDim2.new(0.05, 0, 0.13, 0
     end
 end)
 
-createToraToggle("PrayBtn", "Auto Pray", UDim2.new(0.05, 0, 0.22, 0), function(state)
+createToraToggle("PrayBtn", "Auto Pray", 55, function(state)
     AutoPray = state
     if AutoPray then
         task.spawn(function()
@@ -345,7 +359,7 @@ createToraToggle("PrayBtn", "Auto Pray", UDim2.new(0.05, 0, 0.22, 0), function(s
     end
 end)
 
-createToraToggle("EggBtn", "Auto Collect Egg", UDim2.new(0.05, 0, 0.31, 0), function(state)
+createToraToggle("EggBtn", "Auto Egg", 86, function(state)
     AutoCollectEgg = state
     if AutoCollectEgg then
         task.spawn(function()
@@ -415,12 +429,12 @@ end)
 local Watermark = Instance.new("TextLabel")
 Watermark.Parent = MainFrame
 Watermark.BackgroundTransparency = 1
-Watermark.Position = UDim2.new(0, 0, 0.93, 0)
-Watermark.Size = UDim2.new(1, 0, 0, 20)
+Watermark.Position = UDim2.new(0, 0, 0, 168)
+Watermark.Size = UDim2.new(1, 0, 0, 15)
 Watermark.Font = Enum.Font.SourceSansItalic
 Watermark.Text = "made by Second"
 Watermark.TextColor3 = Color3.fromRGB(120, 120, 130)
-Watermark.TextSize = 11
+Watermark.TextSize = 10
 
 local FloatingBtn = Instance.new("TextButton")
 FloatingBtn.Name = "FloatingBtn"
